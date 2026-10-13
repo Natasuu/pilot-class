@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your First Personal Assistant · Cohort 1</title>
+<meta name="description" content="Five Thursdays. Build an assistant that already knows your day.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@400&display=swap" rel="stylesheet">
+<style>
+@font-face { font-family: "Uncut Sans"; src: url("fonts/UncutSans-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Uncut Sans"; src: url("fonts/UncutSans-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Nyght Serif"; src: url("fonts/NyghtSerif-RegularItalic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Nyght Serif"; src: url("fonts/NyghtSerif-BoldItalic.woff2") format("woff2"); font-weight: 700; font-style: italic; font-display: swap; }
+
+:root {
+  --background: #dde1ed;
+  --foreground: #22314e;
+  --accent: #e4ff8c;
+  --body: rgba(34, 49, 78, 0.8);
+  --support: rgba(34, 49, 78, 0.75);
+  --hairline: rgba(34, 49, 78, 0.15);
+  --radius: 4px;
+  --gutter: 24px;
+}
+@media (min-width: 768px) { :root { --gutter: 48px; } }
+@media (min-width: 1024px) { :root { --gutter: 64px; } }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Uncut Sans", sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+em { font-family: "Nyght Serif", serif; font-style: italic; font-weight: 400; }
+.it-bold { font-family: "Nyght Serif", serif; font-style: italic; font-weight: 700; }
+.mono { font-family: "Inconsolata", ui-monospace, Menlo, monospace; font-size: 14px; line-height: 1.35; }
+a { color: inherit; }
+
+/* ---------- header ---------- */
+.site-header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px var(--gutter);
+  transition: padding .5s cubic-bezier(0.22, 1, 0.36, 1), background-color .5s ease, backdrop-filter .5s ease;
+}
+.site-header.tight {
+  padding-top: 10px; padding-bottom: 10px;
+  background: rgba(221, 225, 237, 0.3);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.id { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.portrait { width: 36px; height: 36px; border-radius: 9999px; object-fit: cover; object-position: center 15%; display: block; }
+.name { display: none; font-weight: 500; font-size: 17px; letter-spacing: -0.02em; }
+@media (min-width: 1024px) { .name { display: inline; } }
+.nav { display: none; gap: 28px; }
+@media (min-width: 768px) { .nav { display: flex; } }
+.nav a { font-weight: 500; font-size: 14px; text-transform: uppercase; text-decoration: none; transition: opacity .2s ease; }
+.nav a:hover { opacity: .6; }
+.right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.chip {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 28px; background: var(--accent); border-radius: var(--radius);
+  transition: transform .2s ease;
+}
+.chip:hover { transform: scale(1.04); }
+.chip img { width: 20px; height: 20px; display: block; }
+.clock { font-variant-numeric: tabular-nums; font-size: 16px; line-height: 1.28; transition: opacity .4s ease; }
+.site-header.tight .clock { opacity: 0; }
+
+/* ---------- hero ---------- */
+.hero {
+  min-height: 100svh;
+  padding: 112px var(--gutter) 56px;
+  display: flex; align-items: flex-end;
+}
+h1 {
+  font-weight: 500;
+  font-size: clamp(3.25rem, 13vw, 11rem);
+  line-height: 0.92;
+  letter-spacing: -0.045em;
+}
+h1 em { font-weight: 400; }
+
+/* ---------- sections ---------- */
+section {
+  display: grid; grid-template-columns: 1fr; gap: 16px;
+  padding: 40px var(--gutter);
+  border-top: 1px solid var(--hairline);
+  scroll-margin-top: 56px;
+}
+@media (min-width: 900px) { section { grid-template-columns: 220px minmax(0, 720px); gap: 48px; } }
+.label { font-weight: 500; font-size: 14px; text-transform: uppercase; letter-spacing: 0.02em; background: var(--accent); border-radius: var(--radius); padding: 3px 8px; justify-self: start; align-self: start; width: fit-content; }
+.content p { color: var(--body); max-width: 34em; }
+.content p + p { margin-top: 16px; }
+.statement { font-size: clamp(1.875rem, 5.75vw, 3.75rem); line-height: 1.2; letter-spacing: -0.03em; color: var(--foreground) !important; max-width: 18em !important; }
+.statement .it-bold { letter-spacing: -0.02em; }
+
+.when-big { font-weight: 500; font-size: clamp(1.75rem, 5vw, 2.75rem); line-height: 1; letter-spacing: -0.04em; color: var(--foreground) !important; }
+.when-big em { font-weight: 400; }
+.times { margin-top: 24px; display: grid; gap: 2px; }
+.note { margin-top: 16px; color: var(--support) !important; font-size: 16px; }
+
+.list { list-style: none; }
+.list li { display: grid; grid-template-columns: 88px 1fr; gap: 8px 16px; padding: 20px 0; border-top: 1px solid var(--hairline); }
+.list li:first-child { border-top: 0; padding-top: 0; }
+.list .date { padding-top: 4px; }
+.list h3 { font-weight: 500; font-size: 22px; line-height: 1.15; letter-spacing: -0.02em; }
+.list p { margin-top: 6px; color: var(--support); font-size: 16px; max-width: 32em; }
+
+.needs { list-style: none; }
+.needs li { padding: 12px 0; border-top: 1px solid var(--hairline); color: var(--body); }
+.needs li:first-child { border-top: 0; padding-top: 0; }
+
+
+
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
+.reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .site-header, .chip, .nav a, .reply, .clock { transition: none; }
+  html { scroll-behavior: auto; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header" id="top">
+  <a class="id" href="#top">
+    <img class="portrait" src="assets/portrait.jpg" alt="Nata Suu">
+    <span class="name">Nata Suu</span>
+  </a>
+  <nav class="nav" aria-label="Page">
+    <a href="#when">When</a>
+    <a href="#thursdays">Five Thursdays</a>
+    <a href="#needs">Needs</a>
+  </nav>
+  <div class="right">
+    <a class="chip" href="mailto:hello@natasuu.design?subject=Cohort%201" aria-label="Email Nata"><img src="assets/envelope.svg" alt=""></a>
+    <span class="clock mono" id="clock" aria-hidden="true">MUC --:--</span>
+  </div>
+</header>
+
+<main>
+<div class="hero">
+  <h1>Your first<br><em>personal</em><br>assistant</h1>
+</div>
+
+<section class="reveal">
+  <div class="label">Welcome</div>
+  <div class="content">
+    <p>You’re joining the first version of this course, and I’m excited to build it with you. After our last class, I’d love your honest feedback: what helped, what didn’t, and what you wish we’d covered. Your experience will help shape what comes next. Thank you for saying yes.</p>
+  </div>
+</section>
+
+<section class="reveal">
+  <div class="label">The idea</div>
+  <div class="content">
+    <p>You keep a short log of what you did each day, five minutes, from your phone. The log shows where you need help most.</p>
+    <p>Then we build assistants that use it: a daily review that closes your day, a morning brief that tells you what's next, and one agent for the first thing you'd hand to a real assistant.</p>
+    <p>By the fifth class you can build another agent whenever you need one.</p>
+  </div>
+</section>
+
+<section class="reveal" id="when">
+  <div class="label">When</div>
+  <div class="content">
+    <p class="when-big">Thursday <em>22 Oct</em></p>
+    <div class="times mono">
+      <span>[10:00 Berlin]</span>
+      <span>[09:00 UK]</span>
+      <span>[19:00 Sydney]</span>
+    </div>
+    <p class="note">Every class is one hour, live on Google Meet. The link comes on Monday 19 Oct.</p>
+  </div>
+</section>
+
+<section class="reveal" id="thursdays">
+  <div class="label">The five Thursdays</div>
+  <div class="content">
+    <ol class="list">
+      <li>
+        <span class="date mono">[22 Oct]</span>
+        <div><h3>The basics, and your assistant's job description</h3><p>How AI works, and why answers go wrong. If a real person were your assistant, what would you hand over? You write the list and start your daily log.</p></div>
+      </li>
+      <li>
+        <span class="date mono">[29 Oct]</span>
+        <div><h3>Your log, daily review and morning brief</h3><p>The log becomes a daily review, and a morning brief arrives on your phone.</p></div>
+      </li>
+      <li>
+        <span class="date mono">[5 Nov]</span>
+        <div><h3>Fix what broke, and build</h3><p>We go through the problems of the week. Then time to build, with me in the room.</p></div>
+      </li>
+      <li>
+        <span class="date mono">[12 Nov]</span>
+        <div><h3>Build your own agent</h3><p>I show a content agent for LinkedIn or Substack. You build one for the first thing on your own list.</p></div>
+      </li>
+      <li>
+        <span class="date mono">[19 Nov]</span>
+        <div><h3>Iterate on what you built</h3><p>Run it like a stranger would, see what breaks, and fix it. More time to build.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="reveal" id="needs">
+  <div class="label">What you need</div>
+  <div class="content">
+    <ul class="needs">
+      <li>Claude Pro plan.</li>
+      <li>A place for your log that works on your phone: Google Docs or Notion. We choose together in class 2.</li>
+      <li>Nothing required to install. A work laptop is fine.</li>
+      <li>Optional: Obsidian, free, to see your notes as a map. Skip it if your laptop doesn't allow installs.</li>
+      <li>You decide what Claude can see. We start with one page and nothing else.</li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<script>
+  // header tightens after 20px
+  const header = document.querySelector('.site-header');
+  const onScroll = () => header.classList.toggle('tight', window.scrollY > 20);
+  onScroll(); window.addEventListener('scroll', onScroll, { passive: true });
+
+  // MUC clock
+  const clock = document.getElementById('clock');
+  const fmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Europe/Berlin' });
+  const tick = () => { clock.textContent = 'MUC ' + fmt.format(new Date()); };
+  tick(); setInterval(tick, 20000);
+
+  // one quiet fade-up per section
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) { setTimeout(() => e.target.classList.add('in'), i * 80); io.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+</script>
+</body>
+</html>
