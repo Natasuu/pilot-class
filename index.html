@@ -77,11 +77,14 @@ a { color: inherit; }
 
 /* ---------- hero ---------- */
 .hero {
+  position: relative; overflow: hidden;
   min-height: 100svh;
   padding: 112px var(--gutter) 56px;
   display: flex; align-items: flex-end;
 }
+#brush { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 h1 {
+  position: relative; z-index: 1;
   font-weight: 500;
   font-size: clamp(3.25rem, 13vw, 11rem);
   line-height: 0.92;
@@ -150,6 +153,7 @@ section {
 
 <main>
 <div class="hero">
+  <canvas id="brush" aria-hidden="true"></canvas>
   <h1>Your first<br><em>personal</em><br>assistant</h1>
 </div>
 
@@ -188,11 +192,11 @@ section {
     <ol class="list">
       <li>
         <span class="date mono">[22 Oct]</span>
-        <div><h3>Let’s start with the basics, and what you’d want help with</h3><p>How AI works, and why answers go wrong. If a real person were your assistant, what would you hand over? You write the list and start your daily log.</p></div>
+        <div><h3>How AI works, and what you’d hand to an assistant</h3><p>How AI works, and why answers go wrong. If a real person were your assistant, what would you hand over? You write the list and start your daily log.</p></div>
       </li>
       <li>
         <span class="date mono">[29 Oct]</span>
-        <div><h3>Let’s turn your daily log into a review and a morning brief</h3><p>The log becomes a daily review, and a morning brief arrives on your phone.</p></div>
+        <div><h3>Your daily log, review and morning brief</h3><p>The log becomes a daily review, and a morning brief arrives on your phone.</p></div>
       </li>
       <li>
         <span class="date mono">[5 Nov]</span>
@@ -200,11 +204,11 @@ section {
       </li>
       <li>
         <span class="date mono">[12 Nov]</span>
-        <div><h3>Pick something you need, and we build it</h3><p>I show a content agent for LinkedIn or Substack. You build one for the first thing on your own list.</p></div>
+        <div><h3>Build your own agent</h3><p>I show a content agent for LinkedIn or Substack. You build one for the first thing on your own list.</p></div>
       </li>
       <li>
         <span class="date mono">[19 Nov]</span>
-        <div><h3>Bring what you built, and let’s make it better</h3><p>Run it like a stranger would, see what breaks, and fix it. More time to build.</p></div>
+        <div><h3>Test and improve what you built</h3><p>Run it like a stranger would, see what breaks, and fix it. More time to build.</p></div>
       </li>
     </ol>
   </div>
@@ -216,7 +220,7 @@ section {
     <ul class="needs">
       <li>Claude Pro plan.</li>
       <li>A place for your log that works on your phone: Google Docs or Notion. We choose together in class 2.</li>
-      <li>Nothing required to install. A work laptop is fine.</li>
+      <li>A working laptop.</li>
       <li>Optional: Obsidian, free, to see your notes as a map. Skip it if your laptop doesn't allow installs.</li>
       <li>You decide what Claude can see. We start with one page and nothing else.</li>
     </ul>
@@ -243,6 +247,52 @@ section {
     });
   }, { threshold: 0.12 });
   document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+
+  // highlighter: a lime brush paints behind the title and fades away
+  (() => {
+    const hero = document.querySelector('.hero');
+    const canvas = document.getElementById('brush');
+    if (!hero || !canvas || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const ctx = canvas.getContext('2d');
+    const RADIUS = 80, LIFE = 1100, STEP = 14, COLOR = '228,255,140';
+    let pts = [], last = null, raf = 0, w = 0, h = 0, dpr = 1;
+
+    const size = () => {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = hero.clientWidth; h = hero.clientHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size(); window.addEventListener('resize', size);
+
+    const add = (x, y) => {
+      const now = performance.now();
+      if (last) {
+        const dx = x - last.x, dy = y - last.y, d = Math.hypot(dx, dy);
+        for (let i = STEP; i < d; i += STEP) pts.push({ x: last.x + dx * i / d, y: last.y + dy * i / d, t: now });
+      }
+      pts.push({ x, y, t: now });
+      last = { x, y };
+      if (!raf) raf = requestAnimationFrame(draw);
+    };
+
+    const draw = (now) => {
+      ctx.clearRect(0, 0, w, h);
+      pts = pts.filter((p) => now - p.t < LIFE);
+      for (const p of pts) {
+        const a = 1 - (now - p.t) / LIFE;
+        ctx.fillStyle = 'rgba(' + COLOR + ',' + a.toFixed(3) + ')';
+        ctx.beginPath(); ctx.arc(p.x, p.y, RADIUS, 0, Math.PI * 2); ctx.fill();
+      }
+      raf = pts.length ? requestAnimationFrame(draw) : 0;
+    };
+
+    hero.addEventListener('pointermove', (e) => {
+      const r = hero.getBoundingClientRect();
+      add(e.clientX - r.left, e.clientY - r.top);
+    });
+    hero.addEventListener('pointerleave', () => { last = null; });
+  })();
 </script>
 </body>
 </html>
