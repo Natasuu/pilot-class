@@ -292,6 +292,16 @@ section {
       add(e.clientX - r.left, e.clientY - r.top);
     });
     hero.addEventListener('pointerleave', () => { last = null; });
+
+    // phones: pointer events stop once the page starts scrolling, touch events keep coming
+    const touch = (e) => {
+      const t = e.touches[0]; if (!t) return;
+      const r = hero.getBoundingClientRect();
+      add(t.clientX - r.left, t.clientY - r.top);
+    };
+    hero.addEventListener('touchstart', (e) => { last = null; touch(e); }, { passive: true });
+    hero.addEventListener('touchmove', touch, { passive: true });
+    hero.addEventListener('touchend', () => { last = null; }, { passive: true });
   })();
 </script>
 </body>
